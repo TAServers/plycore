@@ -645,7 +645,7 @@ e2function number entity:plyHasBuild()
 end
 
 hook.Add("GetFallDamage", "plyDisableFallDamage", function(ply, speed)
-	if ply.fallDamageDisabled ~= 0 then return 0 else return 10 end
+	if ply.fallDamageDisabled == 1 then return 0 else return 10 end
 end)
 
 e2function void entity:plyDisableFallDamage(number active)
