@@ -645,10 +645,8 @@ e2function number entity:plyHasBuild()
 end
 
 hook.Add("GetFallDamage", "plyDisableFallDamage", function(ply, speed)
-	if ply.fallDamageDisabled == true then
+	if ply.fallDamageDisabled then
 		return 0
-	else
-		return 10
 	end
 end)
 
@@ -656,9 +654,5 @@ e2function void entity:plyDisableFallDamage(number active)
 	if not isValidPlayer(this) then return self:throw(INVALID_PLAYER_ERROR) end
 	if not hasAccess(self.player, this, "plyDisableFallDamage") then return self:throw(NO_PERMS_ERROR) end
 
-	if active ~= 0 then
-		this.fallDamageDisabled = true
-	else
-		this.fallDamageDisabled = false
-	end
+	this.fallDamageDisabled = active ~= 0
 end
