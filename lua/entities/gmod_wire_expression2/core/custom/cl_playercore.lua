@@ -100,3 +100,5 @@ desc("lastConnectedPlayer", "Returns the last player that joined")
 desc("runOnDisonnect", "Causes the chip to run every initial player spawn")
 desc("disconnectClk", "Returns 1 if this execution was caused by a player joining")
 desc("lastDisconnectedPlayer", "Returns the last player that joined")
+
+desc("plyDisableFallDamage", "Disables fall damage")
