@@ -100,41 +100,41 @@ e2function number entity:plyGetMaxHealth()
 	return this:GetMaxHealth()
 end
 
-local function setArmour(this, armour)
+local function setArmour(self, this, armour)
 	if not isValidPlayer(this) then return self:throw(INVALID_PLAYER_ERROR) end
 	if not hasAccess(self.player, this, "plySetArmor") then return self:throw(NO_PERMS_ERROR) end
 	if not this:HasBuildMode() then return self:throw(BUILDMODE_ERROR) end
 
 	this:SetArmor(math.Clamp(armour, 0, 0x7FFFFFFF))
 end
-local function getArmour(this)
+local function getArmour(self, this)
 	if not isValidPlayer(this) then return self:throw(INVALID_PLAYER_ERROR) end
 	return this:Armor()
 end
-local function getMaxArmour(this)
+local function getMaxArmour(self, this)
 	if not isValidPlayer(this) then return self:throw(INVALID_PLAYER_ERROR) end
 	return this:GetMaxArmor()
 end
 
 e2function void entity:plySetArmor(number armor)
-	setArmour(this, armor)
+	setArmour(self, this, armor)
 end
 e2function void entity:plySetArmour(number armour)
-	setArmour(this, armour)
+	setArmour(self, this, armour)
 end
 
 e2function number entity:plyGetArmor()
-	return getArmour(this)
+	return getArmour(self, this)
 end
 e2function number entity:plyGetArmour()
-	return getArmour(this)
+	return getArmour(self, this)
 end
 
 e2function number entity:plyGetMaxArmor()
-	return getMaxArmour(this)
+	return getMaxArmour(self, this)
 end
 e2function number entity:plyGetMaxArmour()
-	return getMaxArmour(this)
+	return getMaxArmour(self, this)
 end
 
 e2function void entity:plySetMass(number mass)
