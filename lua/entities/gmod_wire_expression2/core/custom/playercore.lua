@@ -2,15 +2,29 @@
 E2Lib.RegisterExtension("playercore", true, "Custom TAS fork of Sir Papate's PlyCore with @strict support and decent code")
 local gm = gmod.GetGamemode()
 
+local MAX_MESSAGE_SIZE_KB = 2
+
 local INVALID_PLAYER_ERROR = "Tried to use an invalid player"
 local NO_PERMS_ERROR = "You do not have permission to run this function"
 local INVALID_VEC_ERROR = "Tried to use an invalid vector"
 local BUILDMODE_ERROR = "You cannot use this function while in build mode"
 
+local MESSAGE_BURST_CONVAR = CreateConVar(
+	"plycore_message_burst",
+	3,
+	FCVAR_ARCHIVE,
+	"Maximum number of chat messages that can be sent per second globally",
+	1
+)
+
+local chatMessagesSent = 0
+timer.Create("plycore.message-burst", 1, 0, function()
+	chatMessagesSent = 0
+end)
+
 local function isValidPlayer(plr)
 	return plr and IsEntity(plr) and IsValid(plr) and plr:IsPlayer()
 end
-
 
 local function hasAccess(plr, target, command)
 	local valid = hook.Call("PlyCoreCommand", gm, plr, target, command)
@@ -349,7 +363,28 @@ e2function void entity:plyExtinguish()
 	this:Extinguish()
 end
 
+local function safeChatPrint(instance, player, args)
+	local messageSizeBits = TASUtils.getChatPrintMessageSizeBits(args)
+	if math.ceil(messageSizeBits / 8 / 1024) > MAX_MESSAGE_SIZE_KB then
+		instance:throw(string.format(
+			"Message size %dKB is larger than maximum size %dKB",
+			messageSizeBits,
+			MAX_MESSAGE_SIZE_KB
+		))
+	elseif chatMessagesSent >= MESSAGE_BURST_CONVAR:GetInt() then
+		instance:throw("Chat message burst limit reached")
+	else
+		chatMessagesSent = chatMessagesSent + 1
+		player:PrintMessage(HUD_PRINTCONSOLE, player:Name() .. " sent this next chat message via E2")
+		player:ChatPrint(unpack(args))
+	end
+end
+
 local function sendMessage(instance, caller, targets, text, centre)
+	if centre then
+		return instance:throw("Printing directly to player HUDs has been disabled. Please use an EGP HUD")
+	end
+
 	for _, plr in ipairs(targets) do
 		if not isValidPlayer(plr) then
 			return instance:throw(INVALID_PLAYER_ERROR)
@@ -360,12 +395,7 @@ local function sendMessage(instance, caller, targets, text, centre)
 	end
 
 	for _, plr in ipairs(targets) do
-		if centre then
-			plr:PrintMessage(HUD_PRINTCENTER, text)
-		else
-			plr:PrintMessage(HUD_PRINTCONSOLE, self.player:Name() .. " sent this next chat message via E2")
-			plr:ChatPrint(text)
-		end
+		safeChatPrint(instance, plr, { text })
 	end
 end
 
@@ -446,7 +476,7 @@ local function printColour(instance, caller, targets, typeids, args)
 	end
 
 	for _, plr in ipairs(targets) do
-		plr:ChatPrint(unpack(args))
+		safeChatPrint(instance, plr, args)
 	end
 end
 
